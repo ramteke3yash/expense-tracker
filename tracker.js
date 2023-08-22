@@ -1,9 +1,8 @@
-const API_BASE_URL =
-  "https://crudcrud.com/api/9dcc37cca59546d2a93f0e4aa730649e/tracker";
+const API_BASE_URL = "http://localhost:4000";
 
 // Cache frequently used elements
 const form = document.getElementById("my-form");
-const nameInput = document.getElementById("name");
+const amountInput = document.getElementById("amount");
 const descriptionInput = document.getElementById("Description");
 const categoryInput = document.getElementById("Category");
 const expenseList = document.getElementById("expenses");
@@ -12,15 +11,15 @@ let editId = null;
 // Function to edit an expense
 function editExpense(expense) {
   // Populate form fields with expense data
-  nameInput.value = expense.name;
+  amountInput.value = expense.amount;
   descriptionInput.value = expense.description;
   categoryInput.value = expense.category;
-  editId = expense._id;
+  editId = expense.id;
 }
 
 // Function to add or update an expense
 async function addOrUpdateExpense() {
-  const name = nameInput.value;
+  const amount = amountInput.value;
   const description = descriptionInput.value;
   const category = categoryInput.value;
 
@@ -28,17 +27,22 @@ async function addOrUpdateExpense() {
 
   if (editId) {
     // Editing an existing expense
-    const expense = { name, description, category };
+    const expense = { amount, description, category };
     try {
-      const response = await axios.put(`${API_BASE_URL}/${editId}`, expense);
+      const response = await axios.put(
+        `${API_BASE_URL}/expense/edit-expense/${editId}`,
+        expense
+      );
+      editId = null;
+      loadExpenseList();
     } catch (err) {
       console.log(err);
     }
   } else {
     //Creating a new expense
-    const expense = { name, description, category };
+    const expense = { amount, description, category };
     try {
-      await axios.post(API_BASE_URL, expense);
+      await axios.post(`${API_BASE_URL}/expense/add-expense`, expense);
     } catch (err) {
       console.log(err);
     }
@@ -46,7 +50,7 @@ async function addOrUpdateExpense() {
 
   // Clear the form
   form.removeAttribute("data-edit-index");
-  nameInput.value = "";
+  amountInput.value = "";
   descriptionInput.value = "";
   categoryInput.value = "";
 
@@ -57,7 +61,7 @@ async function addOrUpdateExpense() {
 // Function to delete an expense
 async function deleteExpense(id) {
   try {
-    await axios.delete(`${API_BASE_URL}/${id}`);
+    await axios.delete(`${API_BASE_URL}/expense/delete-expense/${id}`);
   } catch (err) {
     console.log(err);
   }
@@ -69,8 +73,8 @@ async function deleteExpense(id) {
 // Function to load existing expenses from the API and display them
 async function loadExpenseList() {
   try {
-    const response = await axios.get(API_BASE_URL);
-    const expenses = response.data;
+    const response = await axios.get(`${API_BASE_URL}/expense/get-expenses`);
+    const expenses = response.data.allExpenses;
 
     // Clear the expense list
     expenseList.innerHTML = "";
@@ -78,7 +82,7 @@ async function loadExpenseList() {
     // Display each expense in the expense list
     expenses.forEach(function (expense, index) {
       const li = document.createElement("li");
-      li.textContent = `Expense Amount: ${expense.name}, Description: ${expense.description}, Category: ${expense.category}`;
+      li.textContent = `Expense Amount:₹ ${expense.amount}, Description: ${expense.description}, Category: ${expense.category}`;
 
       // Create the Edit button
       const editButton = document.createElement("button");
@@ -92,7 +96,7 @@ async function loadExpenseList() {
       const deleteButton = document.createElement("button");
       deleteButton.textContent = "Delete";
       deleteButton.addEventListener("click", function () {
-        deleteExpense(expense._id);
+        deleteExpense(expense.id);
       });
       li.appendChild(deleteButton);
 
