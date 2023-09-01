@@ -19,6 +19,13 @@ exports.postUser = async (req, res, next) => {
         .json({ error: "Bad parameters. Something is missing" });
     }
 
+    // Check if a user with the same email already exists
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(409).json({ error: "User already exists" });
+    }
+
     const data = await User.create({
       name: name,
       email: email,
@@ -26,7 +33,7 @@ exports.postUser = async (req, res, next) => {
     });
     res.status(201).json({ newUserDetail: data });
   } catch (error) {
-    console.log("add user is failing", error);
+    console.error("Add user failed:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
