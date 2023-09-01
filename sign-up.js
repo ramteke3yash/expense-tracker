@@ -6,6 +6,12 @@ const passwordInput = document.getElementById("password");
 const form = document.getElementById("my-form");
 const errorMessageElement = document.getElementById("error-message");
 
+// Function to display a success message
+function displaySuccess(message) {
+  const successMessageElement = document.getElementById("success-message");
+  successMessageElement.textContent = message;
+}
+
 // Function to display an error message
 function displayError(message) {
   errorMessageElement.textContent = message;

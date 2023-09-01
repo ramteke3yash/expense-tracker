@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const bcrypt = require("bcrypt");
 
 exports.signinUser = async (req, res, next) => {
   try {
@@ -27,12 +28,14 @@ exports.signinUser = async (req, res, next) => {
       return res.status(409).json({ error: "User already exists" });
     }
 
-    const data = await User.create({
-      name: name,
-      email: email,
-      password: password,
+    bcrypt.hash(password, 10, async (err, hash) => {
+      const data = await User.create({
+        name: name,
+        email: email,
+        password: hash,
+      });
+      res.status(201).json({ message: "Successfully created a new user" });
     });
-    res.status(201).json({ newUserDetail: data });
   } catch (error) {
     console.error("Add user failed:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -51,14 +54,21 @@ exports.loginUser = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Check if the provided password matches the stored password
-    if (user.password !== password) {
-      // Incorrect password
-      return res.status(401).json({ error: "User not authorized" });
-    }
+    // Compare the provided password with the stored hashed password
+    bcrypt.compare(password, user.password, (err, result) => {
+      if (err) {
+        console.error("Wrong Password:", err);
+        return res.status(500).json({ error: "Internal server error" });
+      }
 
-    // Password matches, send success response
-    res.status(200).json({ message: "User login successful" });
+      if (result) {
+        //correct password
+        res.status(200).json({ message: "User login successful" });
+      } else {
+        // Incorrect password
+        res.status(401).json({ error: "User not authorized" });
+      }
+    });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ error: "Internal server error" });
