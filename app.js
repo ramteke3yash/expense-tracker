@@ -16,8 +16,9 @@ const userRoutes = require("./routes/user");
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(expenseRoutes);
-app.use(userRoutes);
+app.use("/expense", expenseRoutes);
+app.use("/user", userRoutes);
+//app.use(userRoutes);
 
 Expense.belongsTo(User);
 User.hasMany(Expense);

@@ -5,12 +5,12 @@ const Expense = require("../models/expense");
 
 const expenseController = require("../controllers/expense");
 
-router.post("/expense/add-expense", expenseController.postExpense);
+router.post("/add-expense", expenseController.postExpense);
 
-router.get("/expense/get-expenses", expenseController.getExpense);
+router.get("/get-expenses", expenseController.getExpense);
 
-router.delete("/expense/delete-expense/:id", expenseController.deleteExpense);
+router.delete("/delete-expense/:id", expenseController.deleteExpense);
 
-router.put("/expense/edit-expense/:id", expenseController.editExpense);
+router.put("/edit-expense/:id", expenseController.editExpense);
 
 module.exports = router;
