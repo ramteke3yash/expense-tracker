@@ -4,21 +4,28 @@ const bodyParser = require("body-parser");
 const sequelize = require("./util/database");
 
 const Expense = require("./models/expense");
+const User = require("./models/user");
+
 const cors = require("cors");
 const { error } = require("console");
 
 const app = express();
 
 const expenseRoutes = require("./routes/expense");
+const userRoutes = require("./routes/user");
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(expenseRoutes);
+app.use(userRoutes);
+
+Expense.belongsTo(User);
+User.hasMany(Expense);
 
 sequelize
   .sync()
   .then((result) => {
-    app.listen(4000);
+    app.listen(3000);
   })
   .catch((err) => {
     console.log(err);

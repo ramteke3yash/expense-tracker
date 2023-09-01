@@ -1,6 +1,6 @@
 const Sequelize = require("sequelize");
 
-const sequelize = new Sequelize("node-complete", "root", "lion", {
+const sequelize = new Sequelize("expense-app", "root", "lion", {
   dialect: "mysql",
   host: "localhost",
 });

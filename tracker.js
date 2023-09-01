@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:4000";
+const API_BASE_URL = "http://localhost:3000";
 
 // Cache frequently used elements
 const form = document.getElementById("my-form");
