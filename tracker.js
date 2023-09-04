@@ -29,9 +29,13 @@ async function addOrUpdateExpense() {
     // Editing an existing expense
     const expense = { amount, description, category };
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.put(
         `${API_BASE_URL}/expense/edit-expense/${editId}`,
-        expense
+        expense,
+        {
+          headers: { Authorization: token },
+        }
       );
       editId = null;
       loadExpenseList();
@@ -42,7 +46,10 @@ async function addOrUpdateExpense() {
     //Creating a new expense
     const expense = { amount, description, category };
     try {
-      await axios.post(`${API_BASE_URL}/expense/add-expense`, expense);
+      const token = localStorage.getItem("token");
+      await axios.post(`${API_BASE_URL}/expense/add-expense`, expense, {
+        headers: { Authorization: token },
+      });
     } catch (err) {
       console.log(err);
     }
@@ -61,7 +68,10 @@ async function addOrUpdateExpense() {
 // Function to delete an expense
 async function deleteExpense(id) {
   try {
-    await axios.delete(`${API_BASE_URL}/expense/delete-expense/${id}`);
+    const token = localStorage.getItem("token");
+    await axios.delete(`${API_BASE_URL}/expense/delete-expense/${id}`, {
+      headers: { Authorization: token },
+    });
   } catch (err) {
     console.log(err);
   }
@@ -73,8 +83,15 @@ async function deleteExpense(id) {
 // Function to load existing expenses from the API and display them
 async function loadExpenseList() {
   try {
-    const response = await axios.get(`${API_BASE_URL}/expense/get-expenses`);
+    const token = localStorage.getItem("token");
+    // console.log("this is aa token", token);
+    // console.log("Before making the GET request");
+    const response = await axios.get(`${API_BASE_URL}/expense/get-expenses`, {
+      headers: { Authorization: token },
+    });
+    //console.log("After making the GET request");
     const expenses = response.data.allExpenses;
+    //console.log(expenses);
 
     // Clear the expense list
     expenseList.innerHTML = "";
@@ -110,7 +127,7 @@ async function loadExpenseList() {
 
 // Add event listener for form submission
 form.addEventListener("submit", function (e) {
-  e.preventDefault(); // Prevent form submission
+  e.preventDefault();
   addOrUpdateExpense();
 });
 

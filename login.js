@@ -23,6 +23,7 @@ async function loginUser() {
 
     // console.log("Attempting login with email:", email);
     console.log("User login successful:", response.data);
+    localStorage.setItem("token", response.data.token);
 
     // Clear the form
     emailInput.value = "";

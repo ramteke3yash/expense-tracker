@@ -1,5 +1,10 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { authenticate } = require("../middleware/auth");
+require("dotenv").config();
+
+const secretkey = process.env.secretkey;
 
 exports.signinUser = async (req, res, next) => {
   try {
@@ -42,6 +47,10 @@ exports.signinUser = async (req, res, next) => {
   }
 };
 
+function generateAccessToken(id) {
+  return jwt.sign({ userId: id }, secretkey);
+}
+
 exports.loginUser = async (req, res) => {
   try {
     const email = req.body.email;
@@ -63,7 +72,11 @@ exports.loginUser = async (req, res) => {
 
       if (result) {
         //correct password
-        res.status(200).json({ message: "User login successful" });
+        console.log("this is user id>>>", user.id);
+        res.status(200).json({
+          message: "User login successful",
+          token: generateAccessToken(user.id),
+        });
       } else {
         // Incorrect password
         res.status(401).json({ error: "User not authorized" });

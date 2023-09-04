@@ -20,10 +20,10 @@ app.use("/expense", expenseRoutes);
 app.use("/user", userRoutes);
 //app.use(userRoutes);
 
-Expense.belongsTo(User);
 User.hasMany(Expense);
+Expense.belongsTo(User);
 
-sequelize
+sequelize //{ force: true }
   .sync()
   .then((result) => {
     app.listen(3000);

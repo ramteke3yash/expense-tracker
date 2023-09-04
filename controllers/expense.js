@@ -2,14 +2,16 @@ const Expense = require("../models/expense");
 
 exports.postExpense = async (req, res, next) => {
   try {
+    //console.log("is this working?");
     const amount = req.body.amount;
     const description = req.body.description;
     const category = req.body.category;
-
+    console.log("request id-->", req.user);
     const data = await Expense.create({
       amount: amount,
       description: description,
       category: category,
+      userId: req.user.dataValues.id,
     });
     res.status(201).json({ newExpenseDetail: data });
   } catch (error) {
@@ -20,7 +22,8 @@ exports.postExpense = async (req, res, next) => {
 
 exports.getExpense = async (req, res, next) => {
   try {
-    const expenses = await Expense.findAll();
+    const expenses = await Expense.findAll({ where: { userId: req.user.id } });
+    //console.log(">>>>>1", expenses);
     res.status(200).json({ allExpenses: expenses });
   } catch (error) {
     console.log("get expense is failing", error);
@@ -30,7 +33,7 @@ exports.getExpense = async (req, res, next) => {
 
 exports.deleteExpense = async (req, res) => {
   const eId = req.params.id;
-  await Expense.destroy({ where: { id: eId } });
+  await Expense.destroy({ where: { id: eId, userId: req.user.id } });
   res.sendStatus(200);
 };
 
