@@ -13,11 +13,16 @@
     />
   </head>
   <body>
-    <header>
-      <h1>Expense Tracker</h1>
+    <header class="head">
+      <div class="head item-1"><h1>Expense Tracker</h1></div>
+      <div class="head item-2" class="membership-button">
+        <a href="#"><button id="rzp-button" class="button" >Buy Premium</button></a>
+      </div>
     </header>
 
     <section class="container">
+    
+
       <div class="row justify-content-center">
         <div class="col-md-6">
           <form id="my-form">
@@ -42,16 +47,23 @@
             <input class="btn" type="submit" value="Add Expense" />
           </form>
         </div>
+        </div>
       </div>
 
       <ul id="expenses"></ul>
+
     </section>
+    <!-- Razorpay library -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- Axios library -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-    <!-- Add jQuery library -->
+    <!--  jQuery library -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <!-- Add Bootstrap JS (requires jQuery) -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    
     <script src="tracker.js"></script>
   </body>
 </html>

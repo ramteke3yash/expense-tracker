@@ -84,14 +84,10 @@ async function deleteExpense(id) {
 async function loadExpenseList() {
   try {
     const token = localStorage.getItem("token");
-    // console.log("this is aa token", token);
-    // console.log("Before making the GET request");
     const response = await axios.get(`${API_BASE_URL}/expense/get-expenses`, {
       headers: { Authorization: token },
     });
-    //console.log("After making the GET request");
     const expenses = response.data.allExpenses;
-    //console.log(expenses);
 
     // Clear the expense list
     expenseList.innerHTML = "";
@@ -133,3 +129,91 @@ form.addEventListener("submit", function (e) {
 
 // Load existing expenses from the API and display them
 document.addEventListener("DOMContentLoaded", loadExpenseList);
+
+document.getElementById("rzp-button").onclick = async function (e) {
+  const token = localStorage.getItem("token");
+  const response = await axios.get(`${API_BASE_URL}/purchase/premiummember`, {
+    headers: { Authorization: token },
+  });
+  console.log("this is a response-->", response);
+
+  var options = {
+    key: response.data.key_id,
+    order_id: response.data.order.id,
+    handler: async function (response) {
+      try {
+        const updateResponse = await axios.post(
+          `${API_BASE_URL}/purchase/updatetransactionstatus`,
+          {
+            order_id: options.order_id,
+            payment_id: response.razorpay_payment_id,
+          },
+          {
+            headers: { Authorization: token },
+          }
+        );
+        console.log("Transaction update response: ", updateResponse.data);
+
+        if (updateResponse.data.success) {
+          alert("You are now a premium user");
+        } else {
+          alert("Transaction failed. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error updating transaction status: ", error);
+        alert("Something went wrong. Please try again later.");
+      }
+    },
+  };
+  const rzp1 = new Razorpay(options);
+  rzp1.open();
+  e.preventDefault();
+
+  rzp1.on("payment.failed", async function (response) {
+    console.log("Payment failed: ", response);
+    const updateResponse = await axios.post(
+      `${API_BASE_URL}/purchase/updatetransactionstatus`,
+      {
+        order_id: options.order_id,
+      },
+      {
+        headers: { Authorization: token },
+      }
+    );
+    // alert("Payment failed. Please try again.");
+  });
+};
+
+// document.getElementById("rzp-button").onclick = async function (e) {
+//   const token = localStorage.getItem("token");
+//   const response = await axios.get(`${API_BASE_URL}/purchase/premiummember`, {
+//     headers: { Authorization: token },
+//   });
+//   console.log("this is a response-->", response);
+
+//   var options = {
+//     key: response.data.key_id,
+//     order_id: response.data.order.id,
+//     handler: async function (response) {
+//       await axios.post(
+//         `${API_BASE_URL}/purchase/updatetransactionstatus`,
+//         {
+//           order_id: options.order_id,
+//           payment_id: response.razorpay_payment_id,
+//         },
+//         {
+//           headers: { Authorization: token },
+//         }
+//       );
+//       alert("You are now a premium user");
+//     },
+//   };
+//   const rzp1 = new Razorpay(options);
+//   rzp1.open();
+//   e.preventDefault();
+
+//   rzp1.on("payment.failed", function (response) {
+//     console.log(response);
+//     alert("something went wrong");
+//   });
+// };

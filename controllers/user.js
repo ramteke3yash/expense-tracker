@@ -47,8 +47,8 @@ exports.signinUser = async (req, res, next) => {
   }
 };
 
-function generateAccessToken(id) {
-  return jwt.sign({ userId: id }, secretkey);
+function generateAccessToken(id, ispremium) {
+  return jwt.sign({ userId: id, ispremiumuser: ispremium }, secretkey);
 }
 
 exports.loginUser = async (req, res) => {
@@ -75,7 +75,7 @@ exports.loginUser = async (req, res) => {
         console.log("this is user id>>>", user.id);
         res.status(200).json({
           message: "User login successful",
-          token: generateAccessToken(user.id),
+          token: generateAccessToken(user.id, user.ispremiumuser),
         });
       } else {
         // Incorrect password
