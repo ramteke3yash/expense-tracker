@@ -5,7 +5,6 @@ require("dotenv").config();
 const authenticate = (req, res, next) => {
   try {
     const token = req.header("Authorization");
-    //console.log("this is a token-->", token);
 
     if (!token) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
@@ -23,7 +22,6 @@ const authenticate = (req, res, next) => {
       // console.log("this is a user", user);
 
       req.user = user;
-      //console.log("authen is working");
       next();
     });
   } catch (err) {

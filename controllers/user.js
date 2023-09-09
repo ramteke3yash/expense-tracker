@@ -47,9 +47,9 @@ exports.signinUser = async (req, res, next) => {
   }
 };
 
-function generateAccessToken(id, ispremium) {
+exports.generateAccessToken = (id, ispremium) => {
   return jwt.sign({ userId: id, ispremiumuser: ispremium }, secretkey);
-}
+};
 
 exports.loginUser = async (req, res) => {
   try {
@@ -64,6 +64,11 @@ exports.loginUser = async (req, res) => {
     }
 
     // Compare the provided password with the stored hashed password
+    const tok = jwt.sign(
+      { userId: user.id, ispremiumuser: user.ispremiumuser },
+      secretkey
+    );
+
     bcrypt.compare(password, user.password, (err, result) => {
       if (err) {
         console.error("Wrong Password:", err);
@@ -75,7 +80,7 @@ exports.loginUser = async (req, res) => {
         console.log("this is user id>>>", user.id);
         res.status(200).json({
           message: "User login successful",
-          token: generateAccessToken(user.id, user.ispremiumuser),
+          token: tok,
         });
       } else {
         // Incorrect password

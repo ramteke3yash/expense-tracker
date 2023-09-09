@@ -63,6 +63,7 @@ async function addOrUpdateExpense() {
 
   // Reload and display the expenses
   loadExpenseList();
+  //showLeaderboard();
 }
 
 // Function to delete an expense
@@ -84,6 +85,13 @@ async function deleteExpense(id) {
 async function loadExpenseList() {
   try {
     const token = localStorage.getItem("token");
+    const decodeToken = parseJwt(token);
+    console.log("my token-->", decodeToken);
+    const ispremiumuser = decodeToken.ispremiumuser;
+    if (ispremiumuser) {
+      updatePremiumStatus(ispremiumuser);
+      showLeaderboard();
+    }
     const response = await axios.get(`${API_BASE_URL}/expense/get-expenses`, {
       headers: { Authorization: token },
     });
@@ -128,7 +136,38 @@ form.addEventListener("submit", function (e) {
 });
 
 // Load existing expenses from the API and display them
-document.addEventListener("DOMContentLoaded", loadExpenseList);
+document.addEventListener("DOMContentLoaded", loadExpenseList, showLeaderboard);
+
+function updatePremiumStatus(ispremium) {
+  const buyPremiumButton = document.getElementById("rzp-button");
+  const premiumStatus = document.getElementById("premium-status");
+
+  if (ispremium) {
+    // User is a premium user
+    buyPremiumButton.style.display = "none";
+    premiumStatus.textContent = "Premium User";
+  } else {
+    // User is not a premium user
+    buyPremiumButton.style.display = "block";
+    premiumStatus.textContent = "";
+  }
+}
+
+function parseJwt(token) {
+  var base64Url = token.split(".")[1];
+  var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  var jsonPayload = decodeURIComponent(
+    window
+      .atob(base64)
+      .split("")
+      .map(function (c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join("")
+  );
+
+  return JSON.parse(jsonPayload);
+}
 
 document.getElementById("rzp-button").onclick = async function (e) {
   const token = localStorage.getItem("token");
@@ -152,10 +191,13 @@ document.getElementById("rzp-button").onclick = async function (e) {
             headers: { Authorization: token },
           }
         );
+        localStorage.setItem("token", updateResponse.data.token);
+        showLeaderboard();
         console.log("Transaction update response: ", updateResponse.data);
 
         if (updateResponse.data.success) {
           alert("You are now a premium user");
+          updatePremiumStatus(true);
         } else {
           alert("Transaction failed. Please try again.");
         }
@@ -184,36 +226,25 @@ document.getElementById("rzp-button").onclick = async function (e) {
   });
 };
 
-// document.getElementById("rzp-button").onclick = async function (e) {
-//   const token = localStorage.getItem("token");
-//   const response = await axios.get(`${API_BASE_URL}/purchase/premiummember`, {
-//     headers: { Authorization: token },
-//   });
-//   console.log("this is a response-->", response);
+function showLeaderboard() {
+  const inputElement = document.createElement("input");
+  inputElement.type = "button";
+  inputElement.value = "Show Leaderboard";
+  inputElement.onclick = async () => {
+    const token = localStorage.getItem("token");
+    const userLeaderBoardArray = await axios.get(
+      `${API_BASE_URL}/premium/showLeaderBoard`,
+      {
+        headers: { Authorization: token },
+      }
+    );
+    console.log(userLeaderBoardArray);
 
-//   var options = {
-//     key: response.data.key_id,
-//     order_id: response.data.order.id,
-//     handler: async function (response) {
-//       await axios.post(
-//         `${API_BASE_URL}/purchase/updatetransactionstatus`,
-//         {
-//           order_id: options.order_id,
-//           payment_id: response.razorpay_payment_id,
-//         },
-//         {
-//           headers: { Authorization: token },
-//         }
-//       );
-//       alert("You are now a premium user");
-//     },
-//   };
-//   const rzp1 = new Razorpay(options);
-//   rzp1.open();
-//   e.preventDefault();
-
-//   rzp1.on("payment.failed", function (response) {
-//     console.log(response);
-//     alert("something went wrong");
-//   });
-// };
+    var LeaderboardElem = document.getElementById("leaderboard");
+    LeaderboardElem.innerHTML += "<h1> Leader Board</h1>";
+    userLeaderBoardArray.data.forEach((userDetails) => {
+      LeaderboardElem.innerHTML += `<li>Name: ${userDetails.name} Total Expenses: ${userDetails.total_cost}</li>`;
+    });
+  };
+  document.getElementById("message").appendChild(inputElement);
+}
