@@ -1,24 +1,57 @@
 const Expense = require("../models/expense");
+const User = require("../models/user");
 
 exports.postExpense = async (req, res, next) => {
   try {
-    //console.log("is this working?");
     const amount = req.body.amount;
     const description = req.body.description;
     const category = req.body.category;
-    console.log("request id-->", req.user);
-    const data = await Expense.create({
+
+    // Create the new expense
+    const newExpense = await Expense.create({
       amount: amount,
       description: description,
       category: category,
       userId: req.user.dataValues.id,
     });
-    res.status(201).json({ newExpenseDetail: data });
+    console.log(newExpense);
+
+    // Calculate the new totalExpense
+    const user = req.user;
+    const totalExpense = Number(user.totalExpenses) + Number(amount);
+
+    // Update the user's total expenses
+    await User.update(
+      { totalExpenses: totalExpense },
+      { where: { id: req.user.id } }
+    );
+
+    res.status(201).json({ newExpenseDetail: newExpense });
   } catch (error) {
-    console.log("add expense is failing", error);
+    console.log("Add expense failed:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+// exports.postExpense = async (req, res, next) => {
+//   try {
+//     //console.log("is this working?");
+//     const amount = req.body.amount;
+//     const description = req.body.description;
+//     const category = req.body.category;
+//     console.log("request id-->", req.user);
+//     const data = await Expense.create({
+//       amount: amount,
+//       description: description,
+//       category: category,
+//       userId: req.user.dataValues.id,
+//     });
+//     res.status(201).json({ newExpenseDetail: data });
+//   } catch (error) {
+//     console.log("add expense is failing", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 exports.getExpense = async (req, res, next) => {
   try {
