@@ -153,6 +153,7 @@ function updatePremiumStatus(ispremium) {
   }
 }
 
+//decode the token
 function parseJwt(token) {
   var base64Url = token.split(".")[1];
   var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -169,6 +170,7 @@ function parseJwt(token) {
   return JSON.parse(jsonPayload);
 }
 
+//buy premium
 document.getElementById("rzp-button").onclick = async function (e) {
   const token = localStorage.getItem("token");
   const response = await axios.get(`${API_BASE_URL}/purchase/premiummember`, {
