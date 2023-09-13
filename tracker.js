@@ -243,10 +243,13 @@ function showLeaderboard() {
     console.log(userLeaderBoardArray);
 
     var LeaderboardElem = document.getElementById("leaderboard");
-    LeaderboardElem.innerHTML += "<h1> Leader Board</h1>";
+    LeaderboardElem.innerHTML = "";
+    LeaderboardElem.innerHTML = "<h1> Leader Board</h1>";
     userLeaderBoardArray.data.forEach((userDetails) => {
       LeaderboardElem.innerHTML += `<li>Name: ${userDetails.name} Total Expenses: ${userDetails.totalExpenses}</li>`;
     });
   };
+
+  document.getElementById("message").innerHTML = "";
   document.getElementById("message").appendChild(inputElement);
 }

@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get(
   "/showLeaderBoard",
-  authenticatemiddleware.authenticate,
+  authenticatemiddleware,
   premiumFeatureController.getUserLeaderBoard
 );
 

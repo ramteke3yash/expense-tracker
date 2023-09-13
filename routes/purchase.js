@@ -8,13 +8,13 @@ const router = express.Router();
 
 router.get(
   "/premiummember",
-  authenticatemiddleware.authenticate,
+  authenticatemiddleware,
   purchaseController.purchasepremium
 );
 
 router.post(
   "/updatetransactionstatus",
-  authenticatemiddleware.authenticate,
+  authenticatemiddleware,
   purchaseController.updateTransactionStatus
 );
 

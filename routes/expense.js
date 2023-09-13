@@ -6,27 +6,19 @@ const Expense = require("../models/expense");
 const expenseController = require("../controllers/expense");
 const userauthentication = require("../middleware/auth");
 
-router.post(
-  "/add-expense",
-  userauthentication.authenticate,
-  expenseController.postExpense
-);
+router.post("/add-expense", userauthentication, expenseController.postExpense);
 
-router.get(
-  "/get-expenses",
-  userauthentication.authenticate,
-  expenseController.getExpense
-);
+router.get("/get-expenses", userauthentication, expenseController.getExpense);
 
 router.delete(
   "/delete-expense/:id",
-  userauthentication.authenticate,
+  userauthentication,
   expenseController.deleteExpense
 );
 
 router.put(
   "/edit-expense/:id",
-  userauthentication.authenticate,
+  userauthentication,
   expenseController.editExpense
 );
 

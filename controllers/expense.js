@@ -35,9 +35,7 @@ exports.postExpense = async (req, res, next) => {
     await t.commit();
     res.status(201).json({ newExpenseDetail: newExpense });
   } catch (error) {
-    if (t) {
-      await t.rollback();
-    }
+    await t.rollback();
     console.log("Add expense failed:", error);
     res.status(500).json({ error: "Internal server error" });
   }

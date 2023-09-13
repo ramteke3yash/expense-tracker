@@ -1,16 +1,14 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { authenticate } = require("../middleware/auth");
+const authenticate = require("../middleware/auth");
 require("dotenv").config();
 
 const secretkey = process.env.secretkey;
 
 exports.signinUser = async (req, res, next) => {
   try {
-    const name = req.body.name;
-    const email = req.body.email;
-    const password = req.body.password;
+    const { name, email, password } = req.body;
 
     if (
       !name ||

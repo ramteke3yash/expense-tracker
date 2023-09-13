@@ -31,9 +31,13 @@ async function addUser() {
 
     if (response.status === 201) {
       // Registration successful
+      const loginForm = document.getElementById("my-form");
       console.log("User added successfully:", response.data);
       displayError(""); // Clear any previous error message
-      displaySuccess("Registration successful. You can now log in.");
+      alert("Registration successful. You can now log in.");
+      loginForm.action = "./login.html";
+      loginForm.method = "get";
+      loginForm.submit();
     } else {
       // Other server response errors
       const errorMessage = response.data.error;
