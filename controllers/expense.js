@@ -1,6 +1,24 @@
 const Expense = require("../models/expense");
 const User = require("../models/user");
 const sequelize = require("../util/database");
+const S3Service = require("../services/S3services");
+
+exports.downloadexpense = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const expenses = await Expense.findAll({ where: { userId } });
+    const stringifiedExpenses = JSON.stringify(expenses);
+
+    const filename = `Expense${userId}/${new Date()}.txt`;
+
+    const fileURL = await S3Service.uploadToS3(stringifiedExpenses, filename);
+
+    res.status(200).json({ fileURL, success: true });
+  } catch (error) {
+    console.log("Download expense failed:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 exports.postExpense = async (req, res, next) => {
   let t = await sequelize.transaction();
@@ -20,7 +38,6 @@ exports.postExpense = async (req, res, next) => {
       category: category,
       userId: req.user.dataValues.id,
     });
-    console.log("this is my new expense>>", newExpense);
 
     // Calculate the new totalExpense
     const user = req.user;
@@ -56,7 +73,6 @@ exports.deleteExpense = async (req, res) => {
   const eId = req.params.id;
 
   try {
-    // Find the expense that is being deleted to get its amount
     const deletedExpense = await Expense.findOne({
       where: { id: eId, userId: req.user.id },
     });
