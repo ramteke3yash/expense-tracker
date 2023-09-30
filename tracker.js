@@ -1,5 +1,7 @@
 const API_BASE_URL = "http://localhost:3000";
 
+let decodeToken;
+
 // Cache frequently used elements
 const form = document.getElementById("my-form");
 const amountInput = document.getElementById("amount");
@@ -63,7 +65,6 @@ async function addOrUpdateExpense() {
 
   // Reload and display the expenses
   loadExpenseList();
-  //showLeaderboard();
 }
 
 // Function to delete an expense
@@ -86,7 +87,6 @@ async function loadExpenseList() {
   try {
     const token = localStorage.getItem("token");
     const decodeToken = parseJwt(token);
-    console.log("my token-->", decodeToken);
     const ispremiumuser = decodeToken.ispremiumuser;
     if (ispremiumuser) {
       updatePremiumStatus(ispremiumuser);
@@ -167,16 +167,18 @@ function parseJwt(token) {
       .join("")
   );
 
+  decodeToken = JSON.parse(jsonPayload);
+
   return JSON.parse(jsonPayload);
 }
 
-//buy premium
+//                 --- buy premium ---
 document.getElementById("rzp-button").onclick = async function (e) {
   const token = localStorage.getItem("token");
   const response = await axios.get(`${API_BASE_URL}/purchase/premiummember`, {
     headers: { Authorization: token },
   });
-  console.log("this is a response-->", response);
+  // console.log("this is a response-->", response);
 
   var options = {
     key: response.data.key_id,
@@ -240,7 +242,7 @@ function showLeaderboard() {
         headers: { Authorization: token },
       }
     );
-    console.log(userLeaderBoardArray);
+    //console.log(userLeaderBoardArray);
 
     var LeaderboardElem = document.getElementById("leaderboard");
     LeaderboardElem.innerHTML = "";
@@ -250,6 +252,42 @@ function showLeaderboard() {
     });
   };
 
+  const ispremium = decodeToken.ispremiumuser;
+  const downloadButtonContainer = document.getElementById(
+    "download-button-container"
+  );
+
+  if (ispremium) {
+    // Create and append the download button
+    const downloadButton = document.createElement("button");
+    downloadButton.textContent = "Download File";
+    downloadButton.onclick = download;
+    downloadButtonContainer.innerHTML = ""; // Clear previous content
+    downloadButtonContainer.appendChild(downloadButton);
+  } else {
+    // If the user is not a premium user, hide the download button
+    downloadButtonContainer.innerHTML = "";
+  }
   document.getElementById("message").innerHTML = "";
   document.getElementById("message").appendChild(inputElement);
+}
+
+function download() {
+  axios
+    .get(`${API_BASE_URL}/user/download`, {
+      headers: { Authorization: token },
+    })
+    .then((response) => {
+      if (response.status === 201) {
+        var a = document.createElement("a");
+        a.href = response.data.fileUrl;
+        a.download = "myexpense.csv";
+        a.click();
+      } else {
+        throw new Error(response.data.message);
+      }
+    })
+    .catch((err) => {
+      showError(err);
+    });
 }
