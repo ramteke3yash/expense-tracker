@@ -95,11 +95,18 @@ async function loadExpenseList(page = 1) {
       showLeaderboard();
     }
 
+    // Get the selected number of expenses per page from the dropdown
+    const expensesPerPageSelect = document.getElementById("expenses-per-page");
+    const expensesPerPage = parseInt(expensesPerPageSelect.value);
+
+    // Save the preference in local storage
+    localStorage.setItem("expensesPerPage", expensesPerPage);
+
     // Specify the number of expenses to fetch per page
-    const limit = 3;
+    const limit = expensesPerPage;
 
     const response = await axios.get(`${API_BASE_URL}/expense/get-expenses`, {
-      params: { page, limit }, // Include page and limit as query parameters
+      params: { page, limit },
       headers: { Authorization: token },
     });
 
@@ -170,11 +177,18 @@ form.addEventListener("submit", function (e) {
 });
 
 // Load existing expenses from the API and display them
-document.addEventListener(
-  "DOMContentLoaded",
-  loadExpenseList(1),
-  showLeaderboard
-);
+document.addEventListener("DOMContentLoaded", function () {
+  const expensesPerPageSelect = document.getElementById("expenses-per-page");
+  const storedExpensesPerPage = localStorage.getItem("expensesPerPage");
+  if (storedExpensesPerPage) {
+    expensesPerPageSelect.value = storedExpensesPerPage;
+  }
+  expensesPerPageSelect.addEventListener("change", function () {
+    loadExpenseList(1); // Load the first page when the selection changes
+  });
+
+  loadExpenseList(1);
+});
 
 function updatePremiumStatus(ispremium) {
   const buyPremiumButton = document.getElementById("rzp-button");

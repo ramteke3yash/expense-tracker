@@ -26,6 +26,8 @@ exports.downloadexpense = async (req, res, next) => {
     const stringifiedExpenses = JSON.stringify(expenses);
 
     const filename = `Expense${userId}/${new Date()}.txt`;
+    // const timestamp = new Date().toISOString().replace(/:/g, "-");
+    // const filename = `Expense${userId}/${timestamp}.txt`;
 
     const fileURL = await S3Service.uploadToS3(stringifiedExpenses, filename);
 
