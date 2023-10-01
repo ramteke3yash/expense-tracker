@@ -83,25 +83,39 @@ async function deleteExpense(id) {
 }
 
 // Function to load existing expenses from the API and display them
-async function loadExpenseList() {
+
+async function loadExpenseList(page = 1) {
   try {
     const token = localStorage.getItem("token");
     const decodeToken = parseJwt(token);
     const ispremiumuser = decodeToken.ispremiumuser;
+
     if (ispremiumuser) {
       updatePremiumStatus(ispremiumuser);
       showLeaderboard();
     }
+
+    // Specify the number of expenses to fetch per page
+    const limit = 3;
+
     const response = await axios.get(`${API_BASE_URL}/expense/get-expenses`, {
+      params: { page, limit }, // Include page and limit as query parameters
       headers: { Authorization: token },
     });
+
     const expenses = response.data.allExpenses;
+    const totalPages = Math.ceil(expenses.length / limit);
+
+    // Update the pagination buttons
+    updatePaginationButtons(totalPages, page);
 
     // Clear the expense list
     expenseList.innerHTML = "";
 
-    // Display each expense in the expense list
-    expenses.forEach(function (expense, index) {
+    // Display each expense on the current page
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    expenses.slice(startIndex, endIndex).forEach(function (expense, index) {
       const li = document.createElement("li");
       li.textContent = `Expense Amount:₹ ${expense.amount}, Description: ${expense.description}, Category: ${expense.category}`;
 
@@ -129,6 +143,26 @@ async function loadExpenseList() {
   }
 }
 
+function updatePaginationButtons(totalPages, currentPage) {
+  const paginationButtonsContainer =
+    document.getElementById("pagination-buttons");
+  paginationButtonsContainer.innerHTML = "";
+
+  for (let i = 1; i <= totalPages; i++) {
+    const button = document.createElement("button");
+    button.textContent = i;
+    button.addEventListener("click", function () {
+      loadExpenseList(i);
+    });
+
+    if (i === currentPage) {
+      button.classList.add("active"); // Add a CSS class for the active page
+    }
+
+    paginationButtonsContainer.appendChild(button);
+  }
+}
+
 // Add event listener for form submission
 form.addEventListener("submit", function (e) {
   e.preventDefault();
@@ -136,7 +170,11 @@ form.addEventListener("submit", function (e) {
 });
 
 // Load existing expenses from the API and display them
-document.addEventListener("DOMContentLoaded", loadExpenseList, showLeaderboard);
+document.addEventListener(
+  "DOMContentLoaded",
+  loadExpenseList(1),
+  showLeaderboard
+);
 
 function updatePremiumStatus(ispremium) {
   const buyPremiumButton = document.getElementById("rzp-button");
@@ -229,33 +267,37 @@ document.getElementById("rzp-button").onclick = async function (e) {
     // alert("Payment failed. Please try again.");
   });
 };
-
 function showLeaderboard() {
-  const inputElement = document.createElement("input");
-  inputElement.type = "button";
-  inputElement.value = "Show Leaderboard";
-  inputElement.onclick = async () => {
-    const token = localStorage.getItem("token");
-    const userLeaderBoardArray = await axios.get(
-      `${API_BASE_URL}/premium/showLeaderBoard`,
-      {
-        headers: { Authorization: token },
-      }
-    );
-    //console.log(userLeaderBoardArray);
-
-    var LeaderboardElem = document.getElementById("leaderboard");
-    LeaderboardElem.innerHTML = "";
-    LeaderboardElem.innerHTML = "<h1> Leader Board</h1>";
-    userLeaderBoardArray.data.forEach((userDetails) => {
-      LeaderboardElem.innerHTML += `<li>Name: ${userDetails.name} Total Expenses: ${userDetails.totalExpenses}</li>`;
-    });
-  };
-
+  const token = localStorage.getItem("token");
   const ispremium = decodeToken.ispremiumuser;
   const downloadButtonContainer = document.getElementById(
     "download-button-container"
   );
+  const LeaderboardElem = document.getElementById("leaderboard");
+  const inputElement = document.createElement("input");
+  inputElement.type = "button";
+  inputElement.value = "Show Leaderboard";
+
+  // Add an event listener to the inputElement
+  inputElement.onclick = async () => {
+    try {
+      const userLeaderBoardArray = await axios.get(
+        `${API_BASE_URL}/premium/showLeaderBoard`,
+        {
+          headers: { Authorization: token },
+        }
+      );
+
+      LeaderboardElem.innerHTML = "";
+      LeaderboardElem.innerHTML = "<h1> Leader Board</h1>";
+      userLeaderBoardArray.data.forEach((userDetails) => {
+        LeaderboardElem.innerHTML += `<li>Name: ${userDetails.name} Total Expenses: ${userDetails.totalExpenses}</li>`;
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to fetch leaderboard. Please try again.");
+    }
+  };
 
   if (ispremium) {
     // Create and append the download button
@@ -264,12 +306,72 @@ function showLeaderboard() {
     downloadButton.onclick = download;
     downloadButtonContainer.innerHTML = ""; // Clear previous content
     downloadButtonContainer.appendChild(downloadButton);
+
+    // Create and append the download history button
+    const downloadHistoryButton = document.createElement("button");
+    downloadHistoryButton.textContent = "Download History";
+    downloadHistoryButton.onclick = fetchDownloadHistory;
+    downloadButtonContainer.appendChild(downloadHistoryButton);
   } else {
-    // If the user is not a premium user, hide the download button
+    // If the user is not a premium user, hide the download buttons
     downloadButtonContainer.innerHTML = "";
   }
-  document.getElementById("message").innerHTML = "";
-  document.getElementById("message").appendChild(inputElement);
+
+  // Append the inputElement to the message container
+  const messageContainer = document.getElementById("message");
+  messageContainer.innerHTML = "";
+  messageContainer.appendChild(inputElement);
+}
+
+// Add event listener for "Download History" button
+document.addEventListener("DOMContentLoaded", function () {
+  const downloadHistoryButton = document.getElementById(
+    "download-history-button"
+  );
+  if (downloadHistoryButton) {
+    downloadHistoryButton.addEventListener("click", function () {
+      fetchDownloadHistory();
+    });
+  }
+});
+
+// Function to fetch and display download history
+async function fetchDownloadHistory() {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await axios.get(`${API_BASE_URL}/user/download-history`, {
+      headers: { Authorization: token },
+    });
+    if (response.status === 200) {
+      const downloadHistory = response.data.downloadHistory;
+      const downloadHistoryList = document.getElementById(
+        "download-history-list"
+      );
+
+      // Clear previous content
+      downloadHistoryList.innerHTML = "";
+
+      if (downloadHistory.length === 0) {
+        // Display a message if there is no download history
+        downloadHistoryList.textContent = "No download history available.";
+      } else {
+        // Display each download history record
+        downloadHistory.forEach((record) => {
+          const listItem = document.createElement("div");
+
+          if (record && record.id) {
+            listItem.textContent = `File: ${record.fileUrl}, Download Date: ${record.downloadDate}`;
+            downloadHistoryList.appendChild(listItem);
+          }
+        });
+      }
+    } else {
+      alert(`Error: ${response.data.message}`);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Failed to fetch download history. Please try again.");
+  }
 }
 
 function download() {

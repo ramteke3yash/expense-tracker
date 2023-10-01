@@ -2,6 +2,22 @@ const Expense = require("../models/expense");
 const User = require("../models/user");
 const sequelize = require("../util/database");
 const S3Service = require("../services/S3services");
+const DownloadHistory = require("../models/downloadHistory");
+
+exports.fetchDownloadHistory = async (req, res) => {
+  try {
+    const user = req.user;
+    // Fetch the download history for the user
+    const downloadHistory = await DownloadHistory.findAll({
+      where: { userId: user.id },
+    });
+
+    res.status(200).json({ downloadHistory });
+  } catch (error) {
+    console.error("Fetch download history failed:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 exports.downloadexpense = async (req, res, next) => {
   try {

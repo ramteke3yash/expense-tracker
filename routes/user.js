@@ -14,4 +14,10 @@ router.post("/login", userController.loginUser);
 
 router.get("/download", authenticate, expenseController.downloadexpense);
 
+router.get(
+  "/download-history",
+  authenticate,
+  expenseController.fetchDownloadHistory
+);
+
 module.exports = router;
