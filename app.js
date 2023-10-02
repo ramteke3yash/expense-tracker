@@ -1,7 +1,13 @@
+const fs = require("fs");
+const path = require("path");
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const { v4: uuidv4 } = require("uuid");
+const helmet = require("helmet");
+//const compression = require("compression");
+const morgan = require("morgan");
 
 const sequelize = require("./util/database");
 const Expense = require("./models/expense");
@@ -18,6 +24,14 @@ const passwordRoutes = require("./routes/password");
 
 const app = express();
 
+const accessLogStream = fs.createWriteStream(
+  path.join(__dirname, "access.log"),
+  { flags: "a" }
+);
+
+app.use(helmet());
+//app.use(compression());
+app.use(morgan("combined", { stream: accessLogStream }));
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -42,5 +56,8 @@ DownloadHistory.belongsTo(User);
 sequelize
   .sync() // { force: true }
   .then(() => {
-    app.listen(3000);
+    app.listen(process.env.PORT || 3000);
+  })
+  .catch((err) => {
+    console.log(err);
   });
