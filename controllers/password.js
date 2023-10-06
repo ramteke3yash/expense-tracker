@@ -81,6 +81,11 @@ exports.renderResetPasswordForm = async (req, res) => {
     }
 
     const absolutePath = path.join(__dirname, "../reset_password.html");
+    res.setHeader(
+      "Content-Security-Policy",
+      `script-src 'self' cdnjs.cloudflare.com 'unsafe-inline'`
+    );
+
     res.sendFile(absolutePath);
   } catch (error) {
     console.error(error);
@@ -88,51 +93,51 @@ exports.renderResetPasswordForm = async (req, res) => {
   }
 };
 
-exports.resetPassword = async (req, res) => {
-  const id = req.params.id;
-  const { password } = req.body;
-  console.log("this is myy uid->>", id);
+exports.updatepassword = async (req, res) => {
   try {
-    // Find the record with the given uuid
-    const forgotPasswordRequest = await ForgotPasswordRequests.findOne({
-      where: { id, isActive: true },
+    const newpassword = req.body.password;
+    const { resetpasswordid } = req.params;
+    console.log("my new password is here;", newpassword);
+    console.log("my new reset id is here;", resetpasswordid);
+
+    const resetpasswordrequest = await ForgotPasswordRequests.findOne({
+      where: { id: resetpasswordid },
     });
 
-    if (!forgotPasswordRequest) {
+    if (!resetpasswordrequest) {
       return res
         .status(404)
-        .json({ message: "Link is not valid", success: false });
+        .json({ error: "Forgot password request not found", success: false });
     }
 
-    // Extract the user ID from the forgotPasswordRequest
-    const userId = forgotPasswordRequest.userId;
-
-    // Check if the password is provided and not empty
-    if (!password) {
-      return res
-        .status(400)
-        .json({ message: "Password is required", success: false });
+    // Checking if the request is still active
+    if (!resetpasswordrequest.isActive) {
+      return res.status(403).json({
+        error: "Forgot password request is no longer active",
+        success: false,
+      });
     }
 
-    // Hash the new password
-    const hash = await bcrypt.hash(password, 10);
+    const user = await User.findOne({
+      where: { id: resetpasswordrequest.userId },
+    });
 
-    // Update the user's password
-    await User.update(
-      { password: hash },
-      {
-        where: { id: userId },
-      }
-    );
+    if (!user) {
+      return res.status(404).json({ error: "No user exists", success: false });
+    }
 
-    // Deactivate the forgot password request
-    await forgotPasswordRequest.update({ isActive: false });
+    const saltRounds = 10;
+    const hash = await bcrypt.hash(newpassword, saltRounds);
 
-    res.redirect("../login.html");
+    // Update the user's password and deactivate the forgot password request
+    await user.update({ password: hash });
+    await resetpasswordrequest.update({ isActive: false });
+
+    res.status(201).json({ message: "Successfully updated the new password" });
   } catch (error) {
     console.error(error);
     return res
       .status(500)
-      .json({ message: "Internal server error", success: false });
+      .json({ error: "Internal Server Error", success: false });
   }
 };

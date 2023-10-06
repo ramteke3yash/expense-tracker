@@ -6,12 +6,6 @@ const passwordInput = document.getElementById("password");
 const form = document.getElementById("my-form");
 const errorMessageElement = document.getElementById("error-message");
 
-// Function to display a success message
-function displaySuccess(message) {
-  const successMessageElement = document.getElementById("success-message");
-  successMessageElement.textContent = message;
-}
-
 // Function to display an error message
 function displayError(message) {
   errorMessageElement.textContent = message;
@@ -47,18 +41,15 @@ async function addUser() {
   } catch (err) {
     if (err.response) {
       if (err.response.status === 409) {
-        // Server responded with a conflict (user already exists)
         const errorMessage =
           "User with this email already exists. Please use a different email.";
         console.error("Error adding user:", errorMessage);
         displayError(errorMessage);
       } else {
-        // Network error or other server response errors
         console.error("Network error:", err.message);
         displayError("Network error. Please try again.");
       }
     } else {
-      // An error occurred but there was no response from the server
       console.error("Network error:", err.message);
       displayError("Network error. Please try again.");
     }
@@ -70,7 +61,6 @@ async function addUser() {
   passwordInput.value = "";
 }
 
-// Add event listener for form submission
 form.addEventListener("submit", function (e) {
   e.preventDefault();
   addUser();

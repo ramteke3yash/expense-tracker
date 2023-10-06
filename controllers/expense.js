@@ -4,6 +4,32 @@ const sequelize = require("../util/database");
 const S3Service = require("../services/S3services");
 const DownloadHistory = require("../models/downloadHistory");
 
+exports.saveDownloadHistory = async (req, res) => {
+  try {
+    const { fileURL, userId } = req.body;
+
+    // Save download history to the database
+    const downloadHistory = await DownloadHistory.create({
+      fileUrl: fileURL,
+      userId: userId,
+    });
+
+    if (downloadHistory) {
+      res.status(200).json({
+        success: true,
+        message: "Download history saved successfully",
+      });
+    } else {
+      res
+        .status(400)
+        .json({ success: false, message: "Failed to save download history" });
+    }
+  } catch (error) {
+    console.error("Save download history failed:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+};
+
 exports.fetchDownloadHistory = async (req, res) => {
   try {
     const user = req.user;
@@ -25,9 +51,9 @@ exports.downloadexpense = async (req, res, next) => {
     const expenses = await Expense.findAll({ where: { userId } });
     const stringifiedExpenses = JSON.stringify(expenses);
 
-    const filename = `Expense${userId}/${new Date()}.txt`;
-    // const timestamp = new Date().toISOString().replace(/:/g, "-");
-    // const filename = `Expense${userId}/${timestamp}.txt`;
+    // const filename = `Expense${userId}_${new Date()}.txt`;
+    const timestamp = new Date().toISOString().replace(/:/g, "-");
+    const filename = `Expense${userId}_${timestamp}.txt`;
 
     const fileURL = await S3Service.uploadToS3(stringifiedExpenses, filename);
 
@@ -61,7 +87,7 @@ exports.postExpense = async (req, res, next) => {
     const user = req.user;
     const totalExpense = Number(user.totalExpenses) + Number(amount);
 
-    // Update the user's total expenses
+    // Updating total expenses
     await User.update(
       { totalExpenses: totalExpense },
       { where: { id: req.user.id }, transaction: t }
@@ -79,7 +105,6 @@ exports.postExpense = async (req, res, next) => {
 exports.getExpense = async (req, res, next) => {
   try {
     const expenses = await Expense.findAll({ where: { userId: req.user.id } });
-    //console.log(">>>>>1", expenses);
     res.status(200).json({ allExpenses: expenses });
   } catch (error) {
     console.log("get expense is failing", error);
@@ -100,7 +125,7 @@ exports.deleteExpense = async (req, res) => {
     // Delete the expense
     await Expense.destroy({ where: { id: eId, userId: req.user.id } });
 
-    // Update the user's total expenses
+    // Updating total expenses
     const user = req.user;
     const totalExpense = Number(user.totalExpenses) - Number(deletedAmount);
 
@@ -127,13 +152,12 @@ exports.editExpense = async (req, res) => {
     const oldAmount = expense.amount;
     const amountDifference = Number(amount) - Number(oldAmount);
 
-    // Update the expense fields
     expense.amount = amount;
     expense.description = description;
     expense.category = category;
     await expense.save();
 
-    // Update the user's total expenses
+    // Updating expenses
     const user = req.user;
     const totalExpense = Number(user.totalExpenses) + amountDifference;
 

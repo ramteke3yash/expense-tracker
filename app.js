@@ -4,6 +4,9 @@ const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const dotenv = require("dotenv");
+dotenv.config();
+
 const { v4: uuidv4 } = require("uuid");
 const helmet = require("helmet");
 //const compression = require("compression");

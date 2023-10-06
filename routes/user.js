@@ -20,4 +20,10 @@ router.get(
   expenseController.fetchDownloadHistory
 );
 
+router.post(
+  "/saveDownloadHistory",
+  authenticate,
+  expenseController.saveDownloadHistory
+);
+
 module.exports = router;

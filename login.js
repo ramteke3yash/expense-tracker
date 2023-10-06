@@ -21,7 +21,6 @@ async function loginUser() {
   try {
     const response = await axios.post(`${API_BASE_URL}/user/login`, user);
 
-    // console.log("Attempting login with email:", email);
     console.log("User login successful:", response.data);
     localStorage.setItem("token", response.data.token);
 
@@ -32,7 +31,6 @@ async function loginUser() {
     window.location.href = "./tracker.html";
   } catch (err) {
     if (err.response) {
-      // Server responded with an error
       const errorMessage = err.response.data.error;
       console.error("Login error:", errorMessage);
       displayError(errorMessage);
@@ -43,7 +41,6 @@ async function loginUser() {
   }
 }
 
-// Add event listener for form submission
 form.addEventListener("submit", function (e) {
   e.preventDefault();
   loginUser();

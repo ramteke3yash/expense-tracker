@@ -22,7 +22,6 @@ async function resetPassword() {
   }
 }
 
-// Add event listener for form submission
 form.addEventListener("submit", function (e) {
   e.preventDefault();
   resetPassword();

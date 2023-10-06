@@ -23,7 +23,7 @@ exports.signinUser = async (req, res, next) => {
         .json({ error: "Bad parameters. Something is missing" });
     }
 
-    // Check if a user with the same email already exists
+    // Checking if a user with the same email already exists
     const existingUser = await User.findOne({ where: { email } });
 
     if (existingUser) {
@@ -54,14 +54,14 @@ exports.loginUser = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    // Check if the user with the provided email exists
+    // Checking if the user with the provided email exists
     const user = await User.findOne({ where: { email } });
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Compare the provided password with the stored hashed password
+    // Comparing the provided password with the stored hashed password
     const tok = jwt.sign(
       { userId: user.id, ispremiumuser: user.ispremiumuser },
       secretkey
@@ -74,14 +74,12 @@ exports.loginUser = async (req, res) => {
       }
 
       if (result) {
-        //correct password
         console.log("this is user id>>>", user.id);
         res.status(200).json({
           message: "User login successful",
           token: tok,
         });
       } else {
-        // Incorrect password
         res.status(401).json({ error: "User not authorized" });
       }
     });

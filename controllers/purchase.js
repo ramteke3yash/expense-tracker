@@ -1,6 +1,6 @@
 const Razorpay = require("razorpay");
 const Order = require("../models/order");
-const sequelize  = require("../util/database");
+const sequelize = require("../util/database");
 const userController = require("./user");
 
 exports.purchasepremium = async (req, res) => {
@@ -51,7 +51,6 @@ exports.updateTransactionStatus = async (req, res) => {
           token: token,
         });
       } else {
-        // If payment_id is not provided, consider it as a failed transaction
         await order.update({ status: "FAILED" });
         await req.user.update({ ispremiumuser: false });
         console.log(req.user);

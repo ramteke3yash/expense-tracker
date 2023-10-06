@@ -126,12 +126,15 @@ async function loadExpenseList(page = 1) {
       const li = document.createElement("li");
       li.textContent = `Expense Amount:₹ ${expense.amount}, Description: ${expense.description}, Category: ${expense.category}`;
 
-      // Create the Edit button
       const editButton = document.createElement("button");
       editButton.textContent = "Edit";
       editButton.addEventListener("click", function () {
         editExpense(expense);
       });
+      editButton.style.borderRadius = "10px";
+      editButton.style.backgroundColor = "whitesmoke";
+      editButton.style.padding = "2px 5px";
+      editButton.style.border = "none";
       li.appendChild(editButton);
 
       // Create the Delete button
@@ -140,6 +143,11 @@ async function loadExpenseList(page = 1) {
       deleteButton.addEventListener("click", function () {
         deleteExpense(expense.id);
       });
+      deleteButton.style.borderRadius = "10px";
+      deleteButton.style.backgroundColor = "whitesmoke";
+      deleteButton.style.padding = "2px 5px";
+      deleteButton.style.border = "none";
+
       li.appendChild(deleteButton);
 
       // Append list item to the expense list
@@ -163,8 +171,13 @@ function updatePaginationButtons(totalPages, currentPage) {
     });
 
     if (i === currentPage) {
-      button.classList.add("active"); // Add a CSS class for the active page
+      button.classList.add("active");
     }
+
+    button.style.borderRadius = "10px";
+    button.style.backgroundColor = "whitesmoke";
+    button.style.padding = "2px 7px";
+    button.style.border = "none";
 
     paginationButtonsContainer.appendChild(button);
   }
@@ -230,7 +243,6 @@ document.getElementById("rzp-button").onclick = async function (e) {
   const response = await axios.get(`${API_BASE_URL}/purchase/premiummember`, {
     headers: { Authorization: token },
   });
-  // console.log("this is a response-->", response);
 
   var options = {
     key: response.data.key_id,
@@ -278,7 +290,6 @@ document.getElementById("rzp-button").onclick = async function (e) {
         headers: { Authorization: token },
       }
     );
-    // alert("Payment failed. Please try again.");
   });
 };
 function showLeaderboard() {
@@ -291,6 +302,9 @@ function showLeaderboard() {
   const inputElement = document.createElement("input");
   inputElement.type = "button";
   inputElement.value = "Show Leaderboard";
+  inputElement.style.borderRadius = "10px";
+  inputElement.style.backgroundColor = "whitesmoke";
+  inputElement.style.padding = "2px 5px";
 
   // Add an event listener to the inputElement
   inputElement.onclick = async () => {
@@ -318,6 +332,9 @@ function showLeaderboard() {
     const downloadButton = document.createElement("button");
     downloadButton.textContent = "Download File";
     downloadButton.onclick = download;
+    downloadButton.style.borderRadius = "10px";
+    downloadButton.style.backgroundColor = "whitesmoke";
+    downloadButton.style.padding = "2px 5px";
     downloadButtonContainer.innerHTML = ""; // Clear previous content
     downloadButtonContainer.appendChild(downloadButton);
 
@@ -325,6 +342,9 @@ function showLeaderboard() {
     const downloadHistoryButton = document.createElement("button");
     downloadHistoryButton.textContent = "Download History";
     downloadHistoryButton.onclick = fetchDownloadHistory;
+    downloadHistoryButton.style.borderRadius = "10px";
+    downloadHistoryButton.style.backgroundColor = "whitesmoke";
+    downloadHistoryButton.style.padding = "2px 5px";
     downloadButtonContainer.appendChild(downloadHistoryButton);
   } else {
     // If the user is not a premium user, hide the download buttons
@@ -361,12 +381,9 @@ async function fetchDownloadHistory() {
       const downloadHistoryList = document.getElementById(
         "download-history-list"
       );
-
-      // Clear previous content
       downloadHistoryList.innerHTML = "";
 
       if (downloadHistory.length === 0) {
-        // Display a message if there is no download history
         downloadHistoryList.textContent = "No download history available.";
       } else {
         // Display each download history record
@@ -374,7 +391,13 @@ async function fetchDownloadHistory() {
           const listItem = document.createElement("div");
 
           if (record && record.id) {
-            listItem.textContent = `File: ${record.fileUrl}, Download Date: ${record.downloadDate}`;
+            const downloadDate = new Date(record.downloadDate);
+            const formattedDate = downloadDate.toISOString().split("T")[0];
+
+            const formattedTime = `${downloadDate.getHours()}:${downloadDate.getMinutes()}`;
+
+            listItem.innerHTML = `File: <a href="${record.fileUrl}">download file</a> Download Date: ${formattedDate}, ${formattedTime}`;
+
             downloadHistoryList.appendChild(listItem);
           }
         });
@@ -388,20 +411,52 @@ async function fetchDownloadHistory() {
   }
 }
 
-function download() {
-  const token = localStorage.getItem("token");
-  axios
-    .get(`${API_BASE_URL}/user/download`, {
+async function download() {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`${API_BASE_URL}/user/download`, {
       headers: { Authorization: token },
-    })
-    .then((response) => {
-      if (response.status === 200) {
-        var a = document.createElement("a");
-        a.href = response.data.fileURL;
-        a.download = "myexpense.csv";
-        a.click();
-      } else {
-        alert(`Error: ${response.data.message}`);
-      }
     });
+
+    if (response.status === 200) {
+      var a = document.createElement("a");
+      a.href = response.data.fileURL;
+      a.download = "myexpense.csv";
+      a.click();
+
+      await saveDownloadHistory(response.data.fileURL);
+    } else {
+      alert(`Error: ${response.data.message}`);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("An error occurred during the file download.");
+  }
+}
+
+async function saveDownloadHistory(fileURL) {
+  try {
+    const token = localStorage.getItem("token");
+    const userId = decodeToken.userId;
+    console.log(decodeToken);
+
+    const response = await axios.post(
+      `${API_BASE_URL}/user/saveDownloadHistory`,
+      {
+        fileURL,
+        userId,
+      },
+      {
+        headers: { Authorization: token },
+      }
+    );
+
+    if (response.status === 200) {
+      console.log("Download history saved successfully.");
+    } else {
+      alert(`Error saving download history: ${response.data.message}`);
+    }
+  } catch (err) {
+    console.error("Error saving download history:", err);
+  }
 }

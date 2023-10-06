@@ -11,7 +11,6 @@ const authenticate = (req, res, next) => {
     }
 
     const user = jwt.verify(token, process.env.secretkey);
-    //console.log("user id >>>>", user.userId); ///error?
 
     User.findByPk(user.userId).then((user) => {
       if (!user) {
@@ -19,8 +18,6 @@ const authenticate = (req, res, next) => {
           .status(401)
           .json({ success: false, message: "User not found" });
       }
-      // console.log("this is a user", user);
-
       req.user = user;
       next();
     });
