@@ -13,7 +13,7 @@ const DownloadHistory = sequelize.define("downloadHistory", {
     type: Sequelize.INTEGER,
     allowNull: false,
     references: {
-      model: "User",
+      model: "users",
       key: "id",
     },
   },
