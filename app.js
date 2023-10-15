@@ -10,7 +10,7 @@ dotenv.config();
 const { v4: uuidv4 } = require("uuid");
 // const helmet = require("helmet");
 //const compression = require("compression");
-const morgan = require("morgan");
+//const morgan = require("morgan");
 
 const sequelize = require("./util/database");
 const Expense = require("./models/expense");
@@ -34,8 +34,8 @@ const accessLogStream = fs.createWriteStream(
 
 // app.use(helmet());
 //app.use(compression());
-app.use(morgan("combined", { stream: accessLogStream }));
-app.use(cors({ origin: "http://13.238.4.178:3000" }));
+// app.use(morgan("combined", { stream: accessLogStream }));
+app.use(cors({ origin: "http://13.238.4.178/" }));
 
 // app.use((req, res, next) => {
 //   res.setHeader(
