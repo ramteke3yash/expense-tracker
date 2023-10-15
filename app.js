@@ -8,7 +8,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const { v4: uuidv4 } = require("uuid");
-const helmet = require("helmet");
+// const helmet = require("helmet");
 //const compression = require("compression");
 const morgan = require("morgan");
 
@@ -32,7 +32,7 @@ const accessLogStream = fs.createWriteStream(
   { flags: "a" }
 );
 
-app.use(helmet());
+// app.use(helmet());
 //app.use(compression());
 app.use(morgan("combined", { stream: accessLogStream }));
 app.use(cors());
