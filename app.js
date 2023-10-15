@@ -35,15 +35,15 @@ const accessLogStream = fs.createWriteStream(
 // app.use(helmet());
 //app.use(compression());
 app.use(morgan("combined", { stream: accessLogStream }));
-app.use(cors());
+app.use(cors({ origin: "http://13.238.4.178:3000" }));
 
-app.use((req, res, next) => {
-  res.setHeader(
-    "Content-Security-Policy",
-    "script-src 'self' cdnjs.cloudflare.com 'nonce-your-random-nonce'"
-  );
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader(
+//     "Content-Security-Policy",
+//     "script-src 'self' cdnjs.cloudflare.com 'unsafe-inline''nonce-your-random-nonce'"
+//   );
+//   next();
+// });
 
 app.use(bodyParser.json());
 
