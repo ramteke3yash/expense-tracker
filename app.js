@@ -40,7 +40,7 @@ app.use(cors());
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
-    "script-src 'self' 'unsafe-inline' 'nonce-your-random-nonce' cdn.jsdelivr.net;"
+    "script-src 'self' cdnjs.cloudflare.com 'nonce-your-random-nonce'"
   );
   next();
 });
