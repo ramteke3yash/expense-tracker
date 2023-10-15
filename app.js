@@ -44,6 +44,14 @@ const accessLogStream = fs.createWriteStream(
 //   );
 //   next();
 // });
+app.use(function (req, res, next) {
+  res.setHeader(
+    "Content-Security-Policy-Report-Only",
+    "default-src 'self'; font-src 'self'; connect-src 'self' http://13.238.4.178:3000/expense/get-expenses; img-src 'self'; script-src 'self' https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js https://checkout.razorpay.com/v1/checkout.js; style-src 'self'; frame-src 'self' https://checkout.razorpay.com/v1/checkout.js  https://api.razorpay.com;"
+  );
+  next();
+});
+
 app.use(cors());
 
 app.use(bodyParser.json());
