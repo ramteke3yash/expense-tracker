@@ -36,6 +36,15 @@ const accessLogStream = fs.createWriteStream(
 //app.use(compression());
 app.use(morgan("combined", { stream: accessLogStream }));
 app.use(cors());
+
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "script-src 'self' 'unsafe-inline' 'nonce-your-random-nonce' cdn.jsdelivr.net;"
+  );
+  next();
+});
+
 app.use(bodyParser.json());
 
 app.use("/expense", expenseRoutes);
