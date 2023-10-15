@@ -35,7 +35,7 @@ const accessLogStream = fs.createWriteStream(
 // app.use(helmet());
 //app.use(compression());
 // app.use(morgan("combined", { stream: accessLogStream }));
-app.use(cors({ origin: "http://13.238.4.178/" }));
+// app.use(cors({ origin: ["http://13.238.4.178/", "http://127.0.0.1:5500"] }));
 
 // app.use((req, res, next) => {
 //   res.setHeader(
@@ -44,8 +44,10 @@ app.use(cors({ origin: "http://13.238.4.178/" }));
 //   );
 //   next();
 // });
+app.use(cors());
 
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/expense", expenseRoutes);
 app.use("/user", userRoutes);

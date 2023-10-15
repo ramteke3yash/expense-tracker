@@ -13,7 +13,9 @@ async function resetPassword() {
       `${API_BASE_URL}/password/forgotpassword`,
       user
     );
-
+    if (response.data.success == true) {
+      window.location.href = "./reset_password.html";
+    }
     console.log("Password reset request successful:", response.data);
     alert("password reset link send successfully!!");
   } catch (err) {

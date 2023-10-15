@@ -45,3 +45,11 @@ form.addEventListener("submit", function (e) {
   e.preventDefault();
   loginUser();
 });
+
+document.getElementById("forgotpassword").addEventListener("click", () => {
+  window.location.href = "./forgot-password.html";
+});
+
+document.getElementById("signup").addEventListener("click", () => {
+  window.location.href = "./sign-up.html";
+});
