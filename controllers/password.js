@@ -204,7 +204,7 @@ exports.renderResetPasswordForm = async (req, res) => {
       
               try {
                 const response = await axios.post(
-                  "http://localhost:3000/password/updatepassword/" + resetpasswordid,
+                  "http://13.238.4.178:3000/password/updatepassword/" + resetpasswordid,
                   resetData
                 );
       
