@@ -28,7 +28,7 @@ exports.forgotpassword = async (req, res, next) => {
       isActive: true,
     });
 
-    const resetPasswordUrl = `http://localhost:3000/password/resetpassword/${requestId}`;
+    const resetPasswordUrl = `http://13.238.4.178:3000/password/resetpassword/${requestId}`;
 
     // Create a transporter for sending email
     const transporter = nodemailer.createTransport({
