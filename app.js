@@ -44,6 +44,8 @@ const accessLogStream = fs.createWriteStream(
 //   );
 //   next();
 // });
+app.use(cors());
+
 app.use(function (req, res, next) {
   res.setHeader(
     "Content-Security-Policy-Report-Only",
@@ -51,8 +53,6 @@ app.use(function (req, res, next) {
   );
   next();
 });
-
-app.use(cors());
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
