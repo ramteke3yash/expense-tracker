@@ -36,7 +36,14 @@ const accessLogStream = fs.createWriteStream(
 //app.use(compression());
 // app.use(morgan("combined", { stream: accessLogStream }));
 app.use(
-  cors({ origin: ["http://13.238.4.178", "http://127.0.0.1:5500", "*"] })
+  cors({
+    origin: [
+      "http://13.238.4.178",
+      "http://13.238.4.178:3000",
+      "http://127.0.0.1:5500",
+      "*",
+    ],
+  })
 );
 
 // app.use((req, res, next) => {
