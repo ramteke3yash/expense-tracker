@@ -113,6 +113,7 @@ exports.getExpense = async (req, res, next) => {
 };
 
 exports.deleteExpense = async (req, res) => {
+  //use transaction /////////
   const eId = req.params.id;
 
   try {
@@ -142,6 +143,7 @@ exports.deleteExpense = async (req, res) => {
 };
 
 exports.editExpense = async (req, res) => {
+  //use transaction
   const eId = req.params.id;
   const { amount, description, category } = req.body;
 

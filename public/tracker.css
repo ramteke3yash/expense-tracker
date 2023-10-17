@@ -87,3 +87,19 @@ h1 {
   background: #333;
   color: #fff;
 }
+
+/* For small screens (e.g., smartphones) */
+@media (max-width: 768px) {
+  body {
+    background: #007bff;
+  }
+
+  .container {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  #my-form {
+    padding: 1rem;
+  }
+}
