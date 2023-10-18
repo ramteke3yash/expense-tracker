@@ -9,6 +9,19 @@ const path = require("path");
 
 const PASSWORD_API_KEY = process.env.PASSWORD_API_KEY;
 
+/**
+ * Forgot Password Request
+ *
+ * This function is responsible for handling a request to reset a user's password. It expects a POST request with the user's 'email' in the request body. It checks if the user with the provided email exists, creates a unique request identifier, stores it in the database, and sends a reset password link to the user's email address.
+ *
+ * @param {Object} req - The HTTP request object, which should contain 'email' in the request body.
+ * @param {Object} res - The HTTP response object used to send a success message or an error message.
+ * @param {function} next - The next function for passing control to the next middleware (if applicable).
+ *
+ * @throws {Error} If there is an internal server error during the password reset request process.
+ *
+ * @returns {Object} The function sends an HTTP response indicating the result of the password reset request, including success or error messages.
+ */
 exports.forgotpassword = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -20,17 +33,20 @@ exports.forgotpassword = async (req, res, next) => {
       return res.status(404).json({ error: "User not found" });
     }
 
+    // Generate a unique request identifier
     const requestId = uuid.v4();
 
+    // Create a record of the password reset request in the database
     await ForgotPasswordRequests.create({
       id: requestId,
       userId: user.id,
       isActive: true,
     });
 
+    // Construct the reset password link
     const resetPasswordUrl = `http://13.238.4.178:3000/password/resetpassword/${requestId}`;
 
-    // Create a transporter for sending email
+    // Create a transporter for sending email using nodemailer
     const transporter = nodemailer.createTransport({
       host: "smtp-relay.brevo.com",
       port: 587,
@@ -63,13 +79,27 @@ exports.forgotpassword = async (req, res, next) => {
       }
     });
   } catch (error) {
+    // Handle internal server errors and send an error response
     return res.status(500).json({ error: "Internal server error" });
   }
 };
 
+/**
+ * Render Reset Password Form
+ *
+ * This function renders a web page for resetting the user's password. It expects a GET request with a unique 'uuidd' parameter in the URL. The function checks if the provided 'uuidd' exists in the database and is active. If it's valid, it renders an HTML form for resetting the password.
+ *
+ * @param {Object} req - The HTTP request object, which should contain a 'uuidd' parameter in the URL.
+ * @param {Object} res - The HTTP response object used to render the HTML form or send an error message.
+ *
+ * @throws {Error} If there is an internal server error during the rendering process.
+ *
+ * @returns {HTML} The function renders an HTML form for resetting the password if the 'uuidd' is valid and active. Otherwise, it sends an error message.
+ */
 exports.renderResetPasswordForm = async (req, res) => {
   const uuidd = req.params.uuidd;
   try {
+    // Check if the provided 'uuidd' exists and is active in the database
     const forgotPasswordRequest = await ForgotPasswordRequests.findOne({
       where: { id: uuidd, isActive: true },
     });
@@ -81,6 +111,7 @@ exports.renderResetPasswordForm = async (req, res) => {
     }
 
     if (forgotPasswordRequest.isActive) {
+      // Render the HTML form for resetting the password
       res.send(`<!DOCTYPE html>
       <html lang="en">
         <head>
@@ -177,7 +208,6 @@ exports.renderResetPasswordForm = async (req, res) => {
           <!-- 
           <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
           <script>
-            // const API_BASE_URL = "http://localhost:3000";
       
             const form = document.getElementById("reset-password-form");
             const passwordInput = document.getElementById("password");
@@ -230,18 +260,30 @@ exports.renderResetPasswordForm = async (req, res) => {
       </html>`);
     }
   } catch (error) {
+    // Handle internal server errors and send an error response
     console.error(error);
     res.status(500).json({ message: "Internal server error", success: false });
   }
 };
 
+/**
+ * Update Password
+ *
+ * This function is responsible for updating a user's password based on a password reset request. It expects a POST request with the new 'password' in the request body and the 'resetpasswordid' as a parameter in the URL. The function checks if the provided 'resetpasswordid' is valid and still active, retrieves the corresponding user, hashes the new password, updates the user's password, and deactivates the password reset request.
+ *
+ * @param {Object} req - The HTTP request object, which should contain 'password' in the request body and 'resetpasswordid' as a URL parameter.
+ * @param {Object} res - The HTTP response object used to send a success message or an error message.
+ *
+ * @throws {Error} If there is an internal server error during the password update process.
+ *
+ * @returns {Object} The function sends an HTTP response indicating the result of the password update, including a success message or an error message.
+ */
 exports.updatepassword = async (req, res) => {
   try {
     const newpassword = req.body.password;
     const { resetpasswordid } = req.params;
-    console.log("my new password is here;", newpassword);
-    console.log("my new reset id is here;", resetpasswordid);
 
+    // Check if the provided 'resetpasswordid' exists in the password reset requests
     const resetpasswordrequest = await ForgotPasswordRequests.findOne({
       where: { id: resetpasswordid },
     });
@@ -260,6 +302,7 @@ exports.updatepassword = async (req, res) => {
       });
     }
 
+    // Retrieve the corresponding user for the password reset
     const user = await User.findOne({
       where: { id: resetpasswordrequest.userId },
     });
@@ -268,6 +311,7 @@ exports.updatepassword = async (req, res) => {
       return res.status(404).json({ error: "No user exists", success: false });
     }
 
+    // Hash the new password
     const saltRounds = 10;
     const hash = await bcrypt.hash(newpassword, saltRounds);
 
@@ -277,6 +321,7 @@ exports.updatepassword = async (req, res) => {
 
     res.status(201).json({ message: "Successfully updated the new password" });
   } catch (error) {
+    // Handle internal server error and send an error response
     console.error(error);
     return res
       .status(500)
