@@ -1,5 +1,5 @@
-//const API_BASE_URL = "http://localhost:3000";
-const API_BASE_URL = "http://13.238.4.178:3000";
+const API_BASE_URL = "http://localhost:3000";
+//const API_BASE_URL = "http://13.238.4.178:3000";
 
 const emailInput = document.getElementById("email");
 const form = document.getElementById("reset-password-form");
@@ -14,11 +14,9 @@ async function resetPassword() {
       `${API_BASE_URL}/password/forgotpassword`,
       user
     );
-    if (response.data.success == true) {
-      window.location.href = "./reset_password.html";
+    if (response.status == 200) {
+      alert("password reset link send successfully!!");
     }
-    console.log("Password reset request successful:", response.data);
-    alert("password reset link send successfully!!");
   } catch (err) {
     console.log("error: Something went wrong", err);
     alert("Something went wrong");
