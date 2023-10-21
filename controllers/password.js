@@ -44,7 +44,7 @@ exports.forgotpassword = async (req, res, next) => {
     });
 
     // Construct the reset password link
-    const resetPasswordUrl = `http://13.238.4.178:3000/password/resetpassword/${requestId}`;
+    const resetPasswordUrl = `http://localhost:3000/password/resetpassword/${requestId}`;
 
     // Create a transporter for sending email using nodemailer
     const transporter = nodemailer.createTransport({
@@ -231,11 +231,11 @@ exports.renderResetPasswordForm = async (req, res) => {
               }
       
               const resetData = { password, resetpasswordid };
-              //"http://13.238.4.178:3000" http://13.238.4.178:3000
+              //"http://localhost:3000" http://localhost:3000
       
               try {
                 const response = await axios.post(
-                  "http://13.238.4.178:3000/password/updatepassword/" + resetpasswordid,
+                  "http://localhost:3000/password/updatepassword/" + resetpasswordid,
                   resetData
                 );
       
