@@ -8,9 +8,6 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const { v4: uuidv4 } = require("uuid");
-// const helmet = require("helmet");
-//const compression = require("compression");
-//const morgan = require("morgan");
 
 const sequelize = require("./util/database");
 const Expense = require("./models/expense");
@@ -32,28 +29,10 @@ const accessLogStream = fs.createWriteStream(
   { flags: "a" }
 );
 
-// app.use(helmet());
-//app.use(compression());
-// app.use(morgan("combined", { stream: accessLogStream }));
-// app.use(
-//   cors({
-//     origin: [
-//       "http://13.238.4.178",
-//       "http://13.238.4.178:3000",
-//       "http://127.0.0.1:5500",
-//       "*",
-//     ],
-//   })
-// );
-
 app.use(cors());
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
-
-// app.use((req, res) => {
-//   res.sendFile(path.join(__dirname, `public/${req.url}`));
-// });
 
 app.use("/expense", expenseRoutes);
 app.use("/user", userRoutes);

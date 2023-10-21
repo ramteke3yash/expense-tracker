@@ -1,5 +1,4 @@
-const API_BASE_URL = "http://13.238.4.178:3000";
-//const API_BASE_URL = "http://13.238.4.178:3000";
+const API_BASE_URL = "http://localhost:3000";
 let decodeToken;
 
 // Cache frequently used elements
